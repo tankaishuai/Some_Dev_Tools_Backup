@@ -1,0 +1,13 @@
+Í¼±ê£º
+    IDI_ICON ICON MOVEABLE PURE LOADONCALL DISCARDABLE "..\\..\\Icon.ico"
+Î»Í¼£º
+    IDB_BITMAP BITMAP "..\\..\\Bitmap.bmp"
+²Ëµ¥£º
+    IDM_MENU MENU
+    {
+       POPUP "&File"
+       {
+       MENUITEM "Open",IDM_FILE_OPEN [,GRAYED]
+       MENUITEM SEPARATOR
+       }
+    }
