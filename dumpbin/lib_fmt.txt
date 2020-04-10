@@ -1,0 +1,177 @@
+
+  dumpbin   /exports   yourdll.dll   >   yourdll.def    
+  DUMPBIN   VideoDeCoder.dll   /EXPROTS   /OUT:VideoDeCoder.def
+  lib   /def:yourdll.def   /machine:i386   /out:yourdll.lib
+  LIB   /DEF:VideoDeCoder.def   /MACHINE:IX86
+
+=======================================
+
+LIBRARY   "VideoDeCoder"
+DESCRIPTION   "VideoDeCoder   library"
+EXPORTS
+TM_ClearDecoderBuff@4                           @1
+TM_CloseDecoder@4                                   @2
+TM_DecodePicture@4                                 @3
+TM_DecodePictureHeader@4                     @4
+TM_GetFileEnd@4                                       @5
+TM_GetUValue@4                                         @6
+TM_GetVValue@4                                         @7
+TM_GetYValue@4                                         @8
+TM_OpenDecoder@8                                     @9
+TM_ReturnType@4                                     @10
+TM_SetFileEnd@8                                     @11
+
+EXAMPLE:
+接时带上LIB文件链接;注意的是当有些动态库DUMPBIN的只有函数名,无"@nn"的参数格式,如C++Builder写的DLL,输出就只有 函数名符号,链接时就会报错:   
+error   LNK2002:unresolved   external   symbol   "functionname@nn"   提示程序中引入的函数符号无法识别,这时只要将DEF文件中相应的函数名称改为functionname@nn方式,重新建立LIB,重新链接即可.
+
+=======================================
+
+def文件格式
+ 
+  在链接器阶段可以使用   /DEF（指定模块定义文件）链接器选项调用   .def   文件。   
+    
+  如果生成的   .exe   文件没有导出，使用   .def   文件将使输出文件较大并降低加载速度。   
+    
+  模块定义语句的规则   
+    
+  下列语法规则适用于   .def   文件中的所有语句。其他适用于特定语句的规则与各语句一起加以说明。     
+    
+  语句、属性关键字和用户指定的标识符区分大小写。     
+  包含空格或分号   (;)   的长文件名必须用引号   (")   引起。     
+  使用一个或多个空格、制表符或换行符，将语句关键字同其参数分开和将各语句分开。指定参数的冒号   (:)   或等号   (=)   两旁有零个或多个空格、制表符或换行符。     
+  如果使用   NAME   或   LIBRARY   语句，则这些语句必须位于所有其他语句之前。     
+  在   .def   文件中，SECTIONS   和   EXPORTS   语句可以出现多次。每个语句都可以采用多个规范，各规范间必须用一个或多个空格、制表符或换行符分开。语句关键字必须在第一个规范的前面出现一次，并且可 以在每个附加规范的前面重复。     
+  许多语句都具有等效的   LINK   命令行选项。有关其他详细信息，请参阅相应的   LINK   选项说明。     
+  .def   文件中的注释由每个注释行开始处的分号   (;)   指定。注释不能与语句共享一行，但可以在多行语句的规范间出现。（SECTIONS   和   EXPORTS   为多行语句。）     
+  以十进制或十六进制为基础指定数值参数。     
+  如果字符串参数与保留字匹配，则必须用双引号   (")   将字符串参数引起。   
+    
+  DESCRIPTION   "text"   
+    
+  该语句将字符串写入   .rdata   节。将指定的   text   用单引号或双引号（'   或   "）引起。若要在字符串中使用引号（单引号或双引号），请用其他类型的标记括住字符串。   
+    
+  在模块定义文件中，DESCRIPTION   仅在生成虚拟设备驱动程序   (VxD)   时有效。   
+    
+  EXETYPE:dynamic   |   dev386   
+    
+  在模块定义文件中，EXETYPE   仅在生成虚拟设备驱动程序   (VxD)   时有效。如果生成虚拟设备驱动程序时在模块定义文件中没有指定   EXETYPE，并且如果没有指定   /EXETYPE   链接器选项，则静态加载   (dev386)   生效。   
+    
+  EXPORTS   
+  definitions   
+    
+  EXPORTS   语句引入了一个由一个或多个   definitions（导出的函数或数据）组成的节。每个定义必须在单独一行上。EXPORTS   关键字可以在第一个定义所在的同一行上或在前一行上。.def   文件可以包含一个或多个   EXPORTS   语句。   
+    
+  导出   definitions   的语法为：   
+    
+  entryname[=internalname]   [@ordinal   [NONAME]]   [PRIVATE]   [DATA]   
+  entryname   是要导出的函数名或变量名。这是必选项。如果导出的名称与   DLL   中的名称不同，则通过   internalname   指定   DLL   中导出的名称。例如，如果   DLL   导出函数   func1()，要将它用作   func2()，则应指定：   
+    
+  EXPORTS   
+  func2=func1   
+  @ordinal   允许指定是序号而不是函数名将进入   DLL   的导出表。这有助于最小化   DLL   的大小。.LIB   文件将包含序号与函数之间的映射，这使您得以像通常在使用   DLL   的项目中那样使用函数名。   
+    
+  可选的   NONAME   关键字允许只按序号导出，并减小结果   DLL   中导出表的大小。但是，如果要在   DLL   上使用   GetProcAddress，则必须知道序号，因为名称将无效。   
+    
+  可选的   PRIVATE   关键字禁止将   entryname   放到由   LINK   生成的导入库中。它对同样是由   LINK   生成的图像中的导出无效。   
+    
+  可选的   DATA   关键字指定导出的是数据，而不是代码。例如，可以导出数据变量，如下所示：   
+    
+  EXPORTS   
+  i   DATA   
+  当对同一导出使用   PRIVATE   和   DATA   时，PRIVATE   必须位于   DATA   的前面。   
+    
+  有三种导出定义的方法，按照建议的使用顺序依次为：     
+    
+  源代码中的   __declspec(dllexport)   关键字     
+  .def   文件中的   EXPORTS   语句     
+  LINK   命令中的   /EXPORT   规范     
+  所有这三种方法可以用在同一个程序中。LINK   在生成包含导出的程序时还创建导入库，除非生成中使用了   .exp   文件。   
+    
+  以下是   EXPORTS   节的示例：   
+    
+  EXPORTS   
+        DllCanUnloadNow             @1           PRIVATE       DATA   
+        DllWindowName   =   Name                 DATA   
+        DllGetClassObject         @4   NONAME       PRIVATE   
+        DllRegisterServer         @7   
+        DllUnregisterServer   
+  注意，使用   .def   文件从   DLL   中导出变量时，不需要在变量上指定   __declspec(dllexport)。但是，在任何使用   DLL   的文件中，仍必须在数据声明上使用   __declspec(dllimport)。   
+    
+  LIBRARY   [library][BASE=address]   
+    
+  该语句通知   LINK   创建   DLL。LINK   同时还创建导入库，除非生成中使用了   .exp   文件。   
+    
+  library   参数指定   DLL   的名称。也可以使用   /out   链接器选项指定   DLL   输出名。   
+    
+  BASE=address   参数设置操作系统用来加载   DLL   的基址。该参数重写   0x10000000   的默认   DLL   位置。有关基址的详细信息，请参阅   /BASE   选项说明。     
+    
+  请记住，在生成   DLL   时使用   /DLL   链接器选项。   
+    
+  /HEAP:reserve[,commit]   
+    
+  HEAPSIZE   所展示的功能与   /HEAP   链接器选项相同。   
+    
+  NAME   [application][BASE=address]   
+    
+  该语句指定主输出文件的名称。另一种指定输出文件名的方法是使用   /out   链接器选项，而另一种设置基址的方法是使用   /BASE   链接器选项。如果两种方法都指定了，则   /OUT   重写   NAME。     
+    
+  如果生成   DLL，NAME   将只影响   DLL   名。   
+    
+  SECTIONS   
+  definitions   
+    
+  SECTIONS   语句引入了一个由一个或多个   definitions（关于项目输出文件各节的访问说明符）组成的节。每个定义必须在单独一行上。SECTIONS   关键字可以在第一个定义所在的同一行或前一行上。.def   文件可以包含一个或多个   SECTIONS   语句。   
+    
+  该   SECTIONS   语句为图像文件中的一节或多节设置属性，并可用于重写每种节类型的默认属性。   
+    
+  definitions   的格式为：   
+    
+  .section_name   specifier   
+    
+  此处，.section_name   为程序图像中的节名，specifier   为下列一个或多个访问修饰符：     
+    
+  EXECUTE     
+  READ     
+  SHARED     
+  WRITE     
+  用空格分开修饰符名。例如：   
+    
+  SECTIONS   
+  .rdata   READ   WRITE   
+  SECTIONS   标记   definitions   节列表的开始位置。每个定义必须在单独一行上。SECTIONS   关键字可以在第一个定义所在的同一行或前一行上。.def   文件可以包含一个或多个   SECTIONS   语句。支持   SEGMENTS   关键字作为   SECTIONS   的同义词。   
+    
+  Visual   C++   的早期版本支持：   
+    
+  section   [CLASS   'classname']   specifier   
+  出于兼容性考虑，支持   CLASS   关键字，但忽略了它。   
+    
+  另一种指定节属性的方法是使用   /SECTION   选项。   
+    
+  STACKSIZE   reserve[,commit]   
+    
+  该语句设置堆栈的大小（以字节为单位）。另一种设置堆栈的方法是使用堆栈分配   (/STACK)   选项。有关   reserve   和   commit   参数的详细信息，请参阅关于该选项的文档。     
+    
+  该选项对   DLL   无效。   
+    
+  STUB:filename   
+    
+  当用于生成虚拟设备驱动程序   (VxD)   的模块定义文件时，STUB   允许指定包含将在   VxD   中使用的   IMAGE_DOS_HEADER   结构（在   WINNT.H   中定义）而不是默认头的文件名。   
+    
+  另一种指定   filename   的方法是使用   /STUB   链接器选项。   
+    
+  在模块定义文件中，STUB   仅在生成虚拟设备驱动程序   (VxD)   时有效。   
+    
+  VERSION   major[.minor]   
+    
+  该语句通知   LINK   将一个数字放到   .exe   文件或   DLL   的头中。major   和   minor   参数是从   0   到   65,535   的范围内的十进制数。默认值为   0.0   版。   
+    
+  另一种指定版本号的方法是使用版本信息   (/VERSION)   选项。     
+    
+  VXD   filename   
+    
+  允许指定虚拟设备驱动程序   (VxD)   的名称。默认情况下，VxD   获取与第一个对象文件相同的名称。   
+    
+  另一种指定虚拟设备驱动程序版本的方法是使用   /VXD   链接器选项，另一种命名输出文件的方法是使用   /out   选项。   
+    
+  在模块定义文件中，VXD   仅在生成虚拟设备驱动程序   (VxD)   时有效。
